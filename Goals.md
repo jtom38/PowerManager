@@ -1,16 +1,5 @@
 # PowerManager
 
-PowerShell Package Manager
-
-## Getting Started
-
-Download PowerManager as a global package. TBD
-
-Open your project folder and run the following command o get started.
-
-`New-PowerManager` This will ask you some questions and get your project ready
-
-
 ## Terms
 
 * `manifest` = This is the schema that defines the requirements of a module and or script.  This can be found in the .pmproject or as a hashtable
