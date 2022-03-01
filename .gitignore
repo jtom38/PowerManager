@@ -1,2 +1,4 @@
 .pm/*
 .pmproject
+
+*.tar.gz

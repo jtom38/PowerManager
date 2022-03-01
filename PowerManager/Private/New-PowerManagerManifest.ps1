@@ -1,7 +1,10 @@
-function New-PowerManagerFile {
-    param (
-        
-    )
+function New-PowerManagerManifest {
+    <#
+    .SYNOPSIS
+    This will create a blank manifest file
+    #>
+    param ()
+    # [Alias("npmf")]
     $schema = @{
         Project = @{
             Name = ''
@@ -10,12 +13,11 @@ function New-PowerManagerFile {
             Author = ''
             CompanyName = ''
             Description = ''
+            PowerShellRuntime = ""
         }
         Modules = @(
-            @{
-                Name = "PSGallery"
-                Version = ""
-            }
+        )
+        DevModules = @(
         )
         Repositories = @(
             @{
@@ -26,10 +28,12 @@ function New-PowerManagerFile {
         )
     }
 
-    # Capture the returned object to keep STDOUT quiet
-    $r = New-Item -Path ".\.pm\" -Name 'runtime' -ItemType Directory
-    $r = New-Item -Path ".\.pm\" -Name 'modules' -ItemType Directory
+    if ((Test-Path -Path .\.pmproject) -eq $false) {
+        $schema | ConvertTo-Json | Out-File -FilePath ".\.pmproject"
+    }
 
-    #$r = New-Item -Path '.' -Name ".pmproject"
-    $schema | ConvertTo-Json | Out-File -FilePath ".\.pmproject"
+    # Capture the returned object to keep STDOUT quiet
+    #$r = New-Item -Path ".\.pm\" -Name 'runtime' -ItemType Directory
+
+    return $schema
 }
