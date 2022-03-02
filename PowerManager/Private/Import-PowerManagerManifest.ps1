@@ -11,7 +11,7 @@ function Import-PowerManagerManifest {
 
     $res = Get-Content -Path ".\.pmproject" -Raw | ConvertFrom-Json
     if ($null -eq $res) {
-        throw 
+        throw "The file was imported from disk, but had no content."
     }
     return $res
 }
