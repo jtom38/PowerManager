@@ -8,7 +8,9 @@ function New-PowerManagerRuntime {
         )]
         [string] $RuntimeVersion
     )
+    $ErrorActionPreference = 'Stop'
     throw "Not enabled yet."
+    
     $url = "https://github.com/PowerShell/PowerShell/releases/download/v7.2.1/powershell-7.2.1-osx-x64.tar.gz"
     $urlSplit = $url.Split('/')
     $fileName = $urlSplit[($urlSplit.Length - 1)]
