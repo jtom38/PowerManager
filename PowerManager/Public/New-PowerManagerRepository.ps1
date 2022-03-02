@@ -23,5 +23,7 @@ function New-PowerManagerRepository {
         [string] $Policy
     )
 
-    Register-PSRepository
+    $ErrorActionPreference = 'Stop'
+    throw "Not ready yet"
+    #Register-PSRepository
 }

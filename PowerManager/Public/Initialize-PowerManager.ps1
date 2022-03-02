@@ -12,14 +12,20 @@ function Initialize-PowerManager {
     if ((Test-PowerManagerManifestFile) -eq $false ) { throw "Unable to find the manifest file." }
     if ((Test-PowerManagerModuleDirectory) -eq $false) { throw "Unable to find the modules directory" }
 
-    $manifest = Import-PowerManagerManifest
-    foreach ($module in $manifest.Modules) {
+    #$manifest = Import-PowerManagerManifest
+    $modules = Get-ChildItem -Path (Get-PowerManagerConfig -ModuleCache) -Filter *
+    foreach ($module in $modules) {
         $activeModule = Get-Module -Name $Module.Name
         if (!$null -eq $activeModule) {
             Remove-Module -Name $module.Name
         }
         $name = $module.Name
-        Import-Module "./.pm/modules/$name"
+        try {
+            Import-Module "./.pm/modules/$name"
+        }
+        catch {
+            Write-Error "Failed to import $"
+        }
     }
     
 }
