@@ -4,11 +4,12 @@ function Clear-PowerManager {
     This will clear out the PowerManager cache.  Use this if you are experiencing odd behaviour with your modules.
     #>
     param (
-        [switch] $Modules
+        [switch] $Modules,
+        [switch] $Cache
     )
     if ($Modules) {
-        $Path = "$PWD/.pm/modules"
-        Remove-Item -Path $Path -Force
-        $r = New-Item -Path $Path
+        $Path = Get-PowerManagerConfig -PathModulesCache
+        Remove-Item -Path $Path -Force -Recurse
+        $r = New-Item -Path $Path -ItemType Directory
     }
 }

@@ -1,8 +1,10 @@
 function Get-PowerManagerConfig {
     param (
-        [switch] $ModuleCache,
-        [switch] $Manifest
+        [switch] $PathModulesCache,
+        [switch] $Manifest,
+        [switch] $LockfilePath
     )
-    if ($ModuleCache) { return (Join-Path -Path $PWD -ChildPath ".pm" -AdditionalChildPath @('modules')) }
+    if ($PathModulesCache) { return (Join-Path -Path $PWD -ChildPath ".pm" -AdditionalChildPath @('modules')) }
     if ($Manifest) { return (Join-Path -Path $PWD -ChildPath ".pmproject") }
+    if ($LockfilePath) { return (Join-Path -Path $PWD -ChildPath '.pmproject.lock') }
 }

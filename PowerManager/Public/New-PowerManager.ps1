@@ -9,7 +9,7 @@ function New-PowerManager {
         [string] $PowerShellRuntime = $($PSVersionTable.PSVersion)
     )
     $ErrorActionPreference = 'Stop'
-    if ((Test-PowerManagerManifestFile) -eq $True) { Write-Error "Found a manifest file already exists." }
+    if ((Test-PowerManager -ManifestExists) -eq $True) { Write-Error "Found a manifest file already exists." }
     $manifest = New-PowerManagerManifest
     
     if (-not $Name) { $ProjectName = Read-Host "Enter the name of your project" }

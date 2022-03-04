@@ -18,9 +18,13 @@ Describe "Import-PowerManagerManifest" {
     It "Should return a hashtable if the file exists and has proper format" {
         $manifestPath = Get-PowerManagerConfig -Manifest
         $manifestExists = Test-Path $manifestPath
-        if ($manifestExists -eq $true ) { Remove-Item $manifestPath }
+        if ($manifestExists -eq $true ) { move-item -Path $manifestPath -Destination "$manifestPath.old"}
         New-PowerManagerManifest
         $res = Import-PowerManagerManifest 
+        if ($manifestExists -eq $true) {
+            Remove-Item $manifestPath -Force
+            Move-Item -Path "$manifestPath.old" -Destination $manifestPath
+        }
         $res | should -not -Be ""
         #Remove-Item $manifestPath -Force
     }
