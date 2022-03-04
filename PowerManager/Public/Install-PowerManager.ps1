@@ -17,7 +17,7 @@ function Install-PowerManager {
         $modules += $manifest.DevModules
     }
 
-    $cachePath = Get-PowerManagerConfig -ModuleCache
+    $cachePath = Get-PowerManagerConfig -PathModulesCache
     foreach ($module in $modules) {
         $expectedPath = Join-Path -Path $cachePath -ChildPath $module.Name
         $expectedPath = Join-Path -Path $expectedPath -ChildPath $module.Version

@@ -28,7 +28,7 @@ function New-PowerManagerManifest {
         )
     }
 
-    if ((Test-Path -Path .\.pmproject) -eq $false) {
+    if ((Test-PowerManager -ManifestExists) -eq $false) {
         $schema | ConvertTo-Json | Out-File -FilePath ".\.pmproject"
     }
 
