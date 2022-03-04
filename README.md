@@ -11,7 +11,9 @@ This modules goal is to elevate PowerShell module management by giving it some f
 Download PowerManager as a global package. **TBD**
 
 Open your project folder and run the following command to get started.
-`New-PowerManager` This will ask you some questions and get your project ready
+`New-PowerManager` This will ask you some questions and get your project ready.
+`New-PowerManagerModule` This will add the module to your manifest and install it into your project cache.
+`Initialize-PowerManager` This will sync your project modules with your active PowerShell session.
 
 ## Commands
 
