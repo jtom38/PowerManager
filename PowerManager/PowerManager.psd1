@@ -7,7 +7,7 @@
     ModuleVersion = '0.0.1'
     
     # Supported PSEditions
-    # CompatiblePSEditions = @()
+    CompatiblePSEditions = 'Core', 'Desktop'
     
     # ID used to uniquely identify this module
     GUID = '0f5c7950-b761-4d72-81d0-f1ea42276bba'
@@ -25,7 +25,7 @@
     Description = 'This module is a package manager for PowerShell to manage Modules and PowerShell runtime.'
     
     # Minimum version of the PowerShell engine required by this module
-    # PowerShellVersion = ''
+    PowerShellVersion = '5.1'
     
     # Name of the PowerShell host required by this module
     # PowerShellHostName = ''
@@ -43,7 +43,7 @@
     # ProcessorArchitecture = ''
     
     # Modules that must be imported into the global environment prior to importing this module
-    # RequiredModules = @()
+    RequiredModules = @()
     
     # Assemblies that must be loaded prior to importing this module
     # RequiredAssemblies = @()
