@@ -14,7 +14,7 @@ Describe "Get-PowerManagerConfig" {
 
     It "Should return the path to the cache" {
         $expectedPath = Join-Path -Path $PWD -ChildPath ".pm/modules"
-        Get-PowerManagerConfig -ModuleCache | Should be $expectedPath
+        Get-PowerManagerConfig -PathModulesCache | Should be $expectedPath
     }
 }
 
