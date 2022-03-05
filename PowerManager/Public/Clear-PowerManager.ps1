@@ -1,11 +1,12 @@
 function Clear-PowerManager {
     <#
     .SYNOPSIS
-    This will clear out the PowerManager cache.  Use this if you are experiencing odd behaviour with your modules.
+    This will clear out the PowerManager cache.  
+    Use this if you are experiencing odd behaviour with your modules and are looking to reinstall.
     #>
     param (
-        [switch] $Modules,
-        [switch] $Cache
+        [switch] $Modules
+        #[switch] $Cache
     )
     if ($Modules) {
         $Path = Get-PowerManagerConfig -PathModulesCache

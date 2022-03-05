@@ -7,29 +7,11 @@ function Install-PowerManager {
         [switch] $IsDev,
         [switch] $Force
     )
+
+    $pm = [PowerManager]::new()
+
     if ($Force) {
         Clear-PowerManager -Modules
     }
 
-    $manifest = Import-PowerManagerManifest
-    $modules = $manifest.Modules
-    if ($IsDev) {
-        $modules += $manifest.DevModules
-    }
-
-    $cachePath = Get-PowerManagerConfig -PathModulesCache
-    foreach ($module in $modules) {
-        $expectedPath = Join-Path -Path $cachePath -ChildPath $module.Name
-        $expectedPath = Join-Path -Path $expectedPath -ChildPath $module.Version
-        $moduleNameAndVersion = "$($module.Name):$($module.Version)"
-        if ((Test-Path -Path $expectedPath ) -eq $true) {
-            Write-Host "$moduleNameAndVersion = present"
-        } else {
-            Write-Host "$moduleNameAndVersion = downloading"
-            Save-Module `
-                -Name $module.Name `
-                -RequiredVersion $module.Version `
-                -Path $cachePath
-        }
-    }
 }
