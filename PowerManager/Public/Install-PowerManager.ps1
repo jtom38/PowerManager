@@ -7,11 +7,13 @@ function Install-PowerManager {
         [switch] $IsDev,
         [switch] $Force
     )
+    $ErrorActionPreference = "SilentlyContinue"
+    #$pm = [PowerManager]::new()
+    $pmm = [PowerManagerModules]::new()
 
-    $pm = [PowerManager]::new()
+    # Add Repos
 
-    if ($Force) {
-        Clear-PowerManager -Modules
-    }
-
+    # Download Modules
+    if ($Force) { Clear-PowerManager -Modules }
+    $pmm.Install($IsDev)
 }

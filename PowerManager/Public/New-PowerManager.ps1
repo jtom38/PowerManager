@@ -6,19 +6,15 @@ function New-PowerManager {
         [string] $Author,
         [string] $CompanyName,
         [string] $Description,
-        [string] $PowerShellRuntime = $($PSVersionTable.PSVersion)
+        [string] $PowerShellRuntime = $($PSVersionTable.PSVersion),
+        [switch] $Force
     )
     $ErrorActionPreference = 'Stop'
 
     $pmv = [PowerManagerValidation]::new()
-    if ($pmv.ManifestExist() -eq $True) { Write-Error "Found a manifest file already exists." }
+    if ($pmv.ManifestExist() -eq $True) { Write-Warning "Found a manifest file already exists."; return $null }
 
     $pm = [PowerManager]::new()
-    $pm.New($ProjectName, $Version, $RootModule, $Author, $CompanyName, $Description, $PowerShellRuntime)
+    $pm.New($ProjectName, $Version, $RootModule, $Author, $CompanyName, $Description, $PowerShellRuntime, $Force)
 
-    # Update .gitignore if its present
-    #$gitIgnore = Get-ChildItem -Path . -Filter './.gitignore'
-    #$ignoreContent = Get-Content $gitIgnore.FullName
-    #if ($ignoreContent -like '.pm/*')
-    #Add-Content -Path $gitIgnore.FullName -Value ".pm/*"
 }

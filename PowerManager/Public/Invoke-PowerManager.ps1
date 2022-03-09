@@ -1,14 +1,18 @@
-function Initialize-PowerManager {
+function Invoke-PowerManager {
     <#
     .SYNOPSIS
     This will check to ensure your local instance is in sync with the manifest.
     Project modules will be loaded into your session.
     #>
     # Alias("ipm")]
-    param (
-
-    )
+    param ()
     $ErrorActionPreference = 'Stop'
+    #$_pm = [PowerManager]::new()
+    $_pmm = [PowerManagerModules]::new()
+
+    # Enable runtimes
+
+    # Enable modules
     if ((Test-PowerManager -ManifestExists) -eq $false ) { throw "Unable to find the manifest file." }
     if ((Test-PowerManager -ModulesDirectoryExists) -eq $false) { throw "Unable to find the modules directory" }
 

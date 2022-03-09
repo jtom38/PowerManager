@@ -4,7 +4,14 @@ PowerShell Package Manager
 
 ## Why PowerManager
 
-This modules goal is to elevate PowerShell module management by giving it some features you might miss if you are use to other programing languages like `python`, `javascript`, or even `C#`.  Breaking away the dependance on global modules to more project level module.  If you need a specific version of `SqlServer` and don't want to risk breaking changes from new version of that module then storing your dependencies local to your project is ideal.  `PowerManager` lets you define your project dependencies rather then your computers modules.  If you have two projects that need different version of the same module, your in good hands.
+This modules goal is to elevate PowerShell module management by giving it some features you might miss if you are use to other programing languages like `python`, `javascript`, or even `C#`.  Breaking away from the dependance on global modules to more project level modules.  If you need a specific version of `SqlServer` and don't want to risk breaking changes from new version of that module then storing your dependencies local to your project is ideal.  `PowerManager` lets you define your project dependencies rather then your computers modules.  If you have two projects that need different version of the same module, your in good hands.
+
+## Goals
+
+* Be able to generate project level requirements
+* Be able to install dependencies into your project folder
+* Be able to 
+
 
 ## Getting Started
 
@@ -13,7 +20,7 @@ Download PowerManager as a global package. **TBD**
 Open your project folder and run the following command to get started.
 `New-PowerManager` This will ask you some questions and get your project ready.
 `New-PowerManagerModule` This will add the module to your manifest and install it into your project cache.
-`Initialize-PowerManager` This will sync your project modules with your active PowerShell session.
+`Invoke-PowerManager` This will sync your project modules with your active PowerShell session.
 
 ## Commands
 

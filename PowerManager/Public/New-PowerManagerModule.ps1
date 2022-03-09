@@ -31,6 +31,9 @@ function New-PowerManagerModule {
     if ($pmm._validation.ModulesDirectoryExists() -eq $false) { throw "Unable to find the modules folder." }
     if ($pmm.DoesModuleExist($Name) -eq $true) { Write-Warning "Unable to add '$Name' because its already in the manifest."; return $null }
 
+    # Import repositories if they are missing
+
+    # Install mod
     if ($Global) {
         $pmm.InstallGlobalModule($Name, $Version)
     } else {

@@ -1,5 +1,37 @@
 using namespace System.IO
 
+class PowerManagerSchema {
+    PowerManagerSchema() {}
+}
+
+class PowerManagerManifestProject {
+    [string] $Name
+    [string] $Version
+    [string] $RootModule
+    [string] $Author
+    [string] $CompanyName
+    [string] $Description
+    [string] $PowerShellRuntime
+
+    PowerManagerManifestProject(
+        [string] $Name = '', 
+        [string] $Version = '', 
+        [string] $RootModule = '', 
+        [string] $Author = '', 
+        [string] $CompanyName = '', 
+        [string] $Description = '', 
+        [string] $PowerShellRuntime = '5.1'
+        ) {
+        $this.Name = $Name
+        $this.Version = $Version
+        $this.Author = $Author
+        $this.RootModule = $RootModule
+        $this.CompanyName = $CompanyName
+        $this.Description = $Description
+        $this.PowerShellRuntime = $PowerShellRuntime
+    }
+}
+
 class PowerManagerConfig {
     [string] $ManifestPath
     [string] $ModulesCachePath
@@ -10,6 +42,12 @@ class PowerManagerConfig {
         $this.ModulesCachePath = (Join-Path -Path $PWD -ChildPath ".pm" -AdditionalChildPath @('modules'))
         $this.LockfilePath = (Join-Path -Path $PWD -ChildPath '.pmproject.lock')
     }
+}
+
+enum PowerManagerOsEnum {
+    WINDOWS
+    MAC
+    LINUX
 }
 
 class PowerManagerValidation {
@@ -30,6 +68,36 @@ class PowerManagerValidation {
     [bool] LockFileExists() {
         $res = Test-Path -Path $this._config.LockfilePath
         return $res
+    }
+
+    [PowerManagerOsEnum] GetRuntimeOS() {
+        $os = $Global:PSVersionTable.OS
+        if ($os.Contains("Darwin") -eq $true ) {return [PowerManagerOsEnum]::MAC }
+        elseif ($os.Contains("Windows") -eq $true) { return [PowerManagerOsEnum]::WINDOWS }
+        else { return [PowerManagerOsEnum]::LINUX }
+    }
+
+    [string] GetOSPathSeperator() {
+        $osType = $this.GetRuntimeOS()
+        if ($osType -eq [PowerManagerOsEnum]::WINDOWS) { return ';' }
+        else { return ':' }
+    }
+
+    [bool] IsModulePathInPSModulePath() {
+        # have the module path in memory
+        $modulePath = $this._config.ModulesCachePath
+
+        # Figure out the os path seperator 
+        #$pathSeperator = $this.GetOSPathSeperator()
+
+        # build the path that we will need
+        # $env:PSModulePath += "$pathSeperator$modulePath"
+        if ($env:PSModulePath.Contains($modulePath) -eq $true) { 
+            return $true
+        }
+        else {
+            return $false
+        }
     }
 } 
 
@@ -192,17 +260,88 @@ class PowerManagerModules {
         if ($null -eq $result) { Write-Error "Unable to find '${Name}:${Version}'!"}
         Install-Module -Name $Name -RequiredVersion $Version
     }
+
+    [void] hidden InstallModule([object] $module) {
+        $cachePath = Get-PowerManagerConfig -PathModulesCache
+        $expectedPath = $this.FindModuleVersionImportPath($module.Name, $module.Version)
+
+        $moduleNameAndVersion = "$($module.Name):$($module.Version)"
+        if ((Test-Path -Path $expectedPath ) -eq $true) {
+            Write-Host "$moduleNameAndVersion = present"
+        } else {
+            Write-Host "$moduleNameAndVersion = downloading"
+            Save-Module `
+                -Name $module.Name `
+                -RequiredVersion $module.Version `
+                -Path $cachePath `
+                -Repository $module.Repository
+            $this.Import($module.Name, $module.Version)
+        }
+    }
+
+    [void] Install([switch] $IsDev) {
+        $this.AppendPSModulePath()
+        $manifest = $this._manifest.Import()
+        $modules = $manifest.Modules
+        if ($IsDev) {
+            $modules += $manifest.DevModules
+        }
+    
+        # Install Dependencies
+        foreach ($module in $modules) {
+            if ($module.IsDependency -eq $true) { $this.InstallModule($module) }
+        }
+
+        # Install the rest
+        foreach ($module in $modules) {
+            if ($module.IsDependency -eq $false) { $this.InstallModule($module) }
+        }
+    }
+
+    [string] FindModuleImportPath([string] $Name) {
+        $cachePath = $this._config.ModulesCachePath
+        $expectedPath = Join-Path -Path $cachePath -ChildPath $Name
+        return $expectedPath
+    }
+
+    [string] FindModuleVersionImportPath([string] $Name, [string] $Version) {
+        $cachePath = $this._config.ModulesCachePath
+        $expectedPath = Join-Path -Path $cachePath -ChildPath $Name
+        $expectedPath = Join-Path -Path $expectedPath -ChildPath $Version
+        return $expectedPath
+    }
+
+    [void] Import([string] $Name, [string] $Version) {
+        $importPath = $this.FindModuleImportPath($Name)
+        $expectedPath = $this.FindModuleVersionImportPath($Name, $Version)
+        if ((Test-Path -Path $expectedPath) -eq $false ) { throw "Unable to find the path for ${Name}:${Version} on disk!  Try Install-PowerManager."}
+        Import-Module -Name $importPath -Force
+    }
+
+    [void] AppendPSModulePath() {
+        if ($this._validation.IsModulePathInPSModulePath() -eq $false) {
+            $env:PSModulePath += "$($this._validation.GetOSPathSeperator())$($this._config.ModulesCachePath)"
+        }
+    }
+
+    [void] RemovePSModulePath() {
+        if ($this._validation.IsModulePathInPSModulePath() -eq $true) {
+            $env:PSModulePath = $env:PSModulePath.Remove("$($this._validation.GetOSPathSeperator())$($this._config.ModulesCachePath)")
+        }
+    }
 }
 
-class PowerManger {
+class PowerManager {
     [PowerManagerConfig] $_config
     [PowerManagerManifest] $_manifest
     [PowerManagerValidation] $_validation
+    [PowerManagerModules] $_modules
 
-    PowerManger() {
+    PowerManager() {
         $this._config = [PowerManagerConfig]::new()
         $this._manifest = [PowerManagerManifest]::new()
         $this._validation = [PowerManagerValidation]::new()
+        $this._modules = [PowerManagerModules]::new()
     }
 
     [void] New(
@@ -212,8 +351,9 @@ class PowerManger {
         [string] $Author, 
         [string] $CompanyName, 
         [string] $Description,
-        [string] $PowerShellRuntime
-    ){
+        [string] $PowerShellRuntime,
+        [bool] $Force
+            ){
         
         if (-not $ProjectName) { $ProjectName = Read-Host "Enter the name of your project" }
         if (-not $RootModule) { $RootModule = Read-Host "Enter the name of the PowerShell Module File (psm1) if this is for a module (Enter 'none' if this is a script)" }
@@ -229,11 +369,13 @@ class PowerManger {
         Write-Host "Description: $Description"
         Write-Host "PowerShell Runtime: $PowerShellRuntime"
         
-        $accept = Read-Host "Please confirm the following values: (y/n)"
-        switch ($accept.ToLower()) {
-            'y' { Write-Host "Generating .pmproject" }
-            'n' { Write-Host "Aborted by user"; exit }
-            default { Write-Host "Invalid entry."; exit }
+        if ($Force -eq $false) {
+            $accept = Read-Host "Please confirm the following values: (y/n)"
+            switch ($accept.ToLower()) {
+                'y' { Write-Host "Generating .pmproject" }
+                'n' { Write-Host "Aborted by user"; exit }
+                default { Write-Host "Invalid entry."; exit }
+            }
         }
         
         $manifest = $this._manifest.NewBlankManifest()
@@ -253,31 +395,7 @@ class PowerManger {
     }
 
     [void] CreateModuleCache(){
-        $r = New-Item -Path $this._config.ModulesCachePath -ItemType Directory
-    }
-
-    [void] Install([switch] $IsDev) {
-        $manifest = $this._manifest.Import()
-        $modules = $manifest.Modules
-        if ($IsDev) {
-            $modules += $manifest.DevModules
-        }
-    
-        $cachePath = Get-PowerManagerConfig -PathModulesCache
-        foreach ($module in $modules) {
-            $expectedPath = Join-Path -Path $cachePath -ChildPath $module.Name
-            $expectedPath = Join-Path -Path $expectedPath -ChildPath $module.Version
-            $moduleNameAndVersion = "$($module.Name):$($module.Version)"
-            if ((Test-Path -Path $expectedPath ) -eq $true) {
-                Write-Host "$moduleNameAndVersion = present"
-            } else {
-                Write-Host "$moduleNameAndVersion = downloading"
-                Save-Module `
-                    -Name $module.Name `
-                    -RequiredVersion $module.Version `
-                    -Path $cachePath
-            }
-        }
+        $r = New-Item -Path $this._config.ModulesCachePath -ItemType Directory 
     }
 }
 
